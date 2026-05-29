@@ -97,13 +97,13 @@ def kpi_tasa_vencimiento(prestamos: pd.DataFrame) -> float:
     total = len(prestamos)
     if total == 0:
         return 0.0
-
+    
     hoy = pd.Timestamp(date.today())   # Fecha actual como Timestamp para comparar
 
     # Condición 1: marcados explícitamente como vencidos en la BD
     cond_vencido_explicito = prestamos["estado"] == "vencido"
 
-    # Condición 2: aún en estado 'prestado' pero ya pasó la fecha de devolución
+    # Condición 2: aún en estado "prestado" pero ya pasó la fecha de devolución
     cond_vencido_implicito = (
         (prestamos["estado"] == "prestado") &
         (prestamos["fecha_devolucion_esperada"] < hoy)
@@ -133,7 +133,7 @@ def kpi_top_libros(prestamos: pd.DataFrame, libros: pd.DataFrame) -> pd.DataFram
 
     # Une con la tabla libros para traer el título (JOIN por id_libro)
     resultado = conteo.merge(
-        libros[["id_libro", "titulo"]],   # Solo necesitamos id_libro y titulo de libros
+        libros[["id_libro", "titulo"]],   # Se filtran por id y titulo
         on="id_libro",                    # Columna de unión
         how="left"                        # LEFT JOIN: mantiene todos los préstamos aunque no haya libro
     )
@@ -143,7 +143,7 @@ def kpi_top_libros(prestamos: pd.DataFrame, libros: pd.DataFrame) -> pd.DataFram
         resultado
         .sort_values("total_prestamos", ascending=False)
         .head(5)
-        [["titulo", "total_prestamos"]]   # Solo retorna las columnas relevantes
+        [["titulo", "total_prestamos"]]   # Se filtran columnas relevantes
         .reset_index(drop=True)           # Reinicia el índice desde 0
     )
 
@@ -156,14 +156,14 @@ def kpi_top_libros(prestamos: pd.DataFrame, libros: pd.DataFrame) -> pd.DataFram
 
 def kpi_top_categorias(prestamos: pd.DataFrame, libros: pd.DataFrame) -> pd.DataFrame:
 
-    # Une préstamos con libros para acceder al campo 'categoria'
+    # Une préstamos con libros para acceder al campo "categoria"
     df = prestamos.merge(
-        libros[["id_libro", "categoria"]],  # Solo necesitamos categoría del libro
+        libros[["id_libro", "categoria"]],  # Se filtra por categoria
         on="id_libro",
         how="left"
     )
 
-    # Agrupa por categoría y cuenta préstamos
+    # Se agrupa por categoría y cuenta préstamos
     resultado = (
         df
         .groupby("categoria")
@@ -258,18 +258,18 @@ def kpi_tasa_renovaciones(prestamos: pd.DataFrame) -> float:
 
 def calcular_todos_los_kpis(engine) -> dict:
 
-    # 1. Carga las tres tablas desde MySQL
+    # Carga las tres tablas desde MySQL
     tablas = cargar_tablas(engine)
     libros    = tablas["libros"]
     prestamos = tablas["prestamos"]
 
-    # 2. Calcula cada KPI y los almacena en un diccionario
+    # Calcula cada KPI y los almacena en un diccionario
     kpis = {
         "kpi1_total_prestamos"       : kpi_total_prestamos(prestamos),
         "kpi2_tasa_devolucion"       : kpi_tasa_devolucion_a_tiempo(prestamos),
         "kpi3_tasa_vencimiento"      : kpi_tasa_vencimiento(prestamos),
-        "kpi4_top5_libros"           : kpi_top5_libros(prestamos, libros),
-        "kpi5_top5_categorias"       : kpi_top5_categorias(prestamos, libros),
+        "kpi4_top_libros"           : kpi_top_libros(prestamos, libros),
+        "kpi5_top_categorias"       : kpi_top_categorias(prestamos, libros),
         "kpi6_prestamos_por_mes"     : kpi_prestamos_por_mes(prestamos),
         "kpi7_stock_critico"         : kpi_stock_critico(libros),
         "kpi8_tasa_renovaciones"     : kpi_tasa_renovaciones(prestamos),
