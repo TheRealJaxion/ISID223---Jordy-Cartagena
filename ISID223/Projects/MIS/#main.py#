@@ -35,7 +35,7 @@ if __name__ == "__main__":
     print("\n  Préstamos por mes (últimos 6):")
     print(kpis["kpi6_prestamos_por_mes"].tail(6).to_string(index=False))
  
-    print("\n" + "=" * 55)
+    print("\n" + "=" * 60)
     print("  Para el dashboard: streamlit run dashboard/dashboard.py")
-    print("=" * 55)
+    print("=" * 60)
  
